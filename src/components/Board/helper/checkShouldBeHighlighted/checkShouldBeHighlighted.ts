@@ -1,5 +1,5 @@
 import { TileData } from "src/types";
-import { checkPossibleSwap } from "..";
+import { checkPossibleSwap } from "../";
 
 export const checkShouldBeHighlighted = (
   selectedTile: TileData | undefined,
