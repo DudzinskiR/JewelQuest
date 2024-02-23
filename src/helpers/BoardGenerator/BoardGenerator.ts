@@ -64,34 +64,6 @@ export class BoardGenerator {
     return board!;
   }
 
-  // private addFirstMovePatterns(board: BoardData, firstMoveNumber: number) {
-  //   const newBoard = deepCopy(board);
-  //   const changedTiles: TilePosition[] = [];
-
-  //   const pattern =
-  //     firstMovePatterns[Math.floor(Math.random() * firstMovePatterns.length)];
-
-  //   const posX = Math.floor(Math.random() * newBoard.sizeX);
-  //   const posY = Math.floor(Math.random() * newBoard.sizeY);
-
-  //   if (
-  //     posX + pattern.sizeX > board.sizeX ||
-  //     posY + pattern.sizeY > board.sizeY
-  //   ) {
-  //     console.log(`Wyszło za daleko!!!`);
-  //   }
-
-  //   for (let x = 0; x < pattern.sizeX; x++) {
-  //     for (let y = 0; y < pattern.sizeY; y++) {
-  //       if (changedTiles.find((item) => item.x === x && item.y === y)) {
-  //         console.log(`Zajęte!!!`);
-  //       }
-  //     }
-  //   }
-
-  //   return newBoard;
-  // }
-
   private initializeGrid() {
     const tiles: TileData[] = [];
     let lastIndex: number = 0;
