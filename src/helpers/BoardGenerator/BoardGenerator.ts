@@ -65,10 +65,10 @@ export class BoardGenerator {
         newBoard.tiles.push({
           posX: x,
           posY: y,
-          id: board.itemCount,
+          id: newBoard.itemCount,
           type: randomType,
         });
-        board.itemCount++;
+        newBoard.itemCount++;
       }
     }
 

@@ -5,11 +5,11 @@ export const GameLayout = () => {
   return (
     <div className="w-screen h-screen flex justify-center items-center">
       <Board
-        sizeY={6}
-        sizeX={6}
+        sizeY={7}
+        sizeX={7}
         tileSize={100}
-        tileTypes={getTilesTypes(8)}
-        firstMove={2}
+        tileTypes={getTilesTypes(12)}
+        firstMove={3}
       />
     </div>
   );

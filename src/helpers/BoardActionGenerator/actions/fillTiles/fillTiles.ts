@@ -16,7 +16,7 @@ export const fillTiles = (
         newBoard.tiles.push({
           posX: x,
           posY: y,
-          id: newBoard.itemCount + 1,
+          id: newBoard.itemCount,
           type: tileTypes[Math.floor(Math.random() * tileTypes.length)],
         });
 
