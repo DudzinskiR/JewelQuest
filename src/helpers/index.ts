@@ -5,3 +5,4 @@ export * from "./ConnectedTilesFinder";
 export * from "./checkGameOver";
 export * from "./BoardGenerator";
 export * from "./checkTileConnections";
+export * from "./FirstMoveAdder";
