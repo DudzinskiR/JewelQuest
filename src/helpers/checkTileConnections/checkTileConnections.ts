@@ -5,7 +5,7 @@ export const checkTileConnectionsValid = (
   x: number,
   y: number,
   checkedTypeID: string,
-  maxSameTileTypeInLine: number
+  maxSameTileTypeInLine: number = 3
 ) => {
   const horizontalResult = checkHorizontalConnections(
     board,
