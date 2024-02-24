@@ -1,5 +1,5 @@
 import { BoardData, FirstMovePattern, TileData, TileType } from "src/types";
-import { ConnectedTilesFinder, deepCopy } from "src/helpers";
+import { deepCopy } from "src/helpers";
 import { firstMovePatterns } from "src/utils";
 
 export class FirstMoveAdder {
@@ -28,7 +28,6 @@ export class FirstMoveAdder {
         }
       }
     }
-
     return this._board;
   }
 
@@ -57,18 +56,13 @@ export class FirstMoveAdder {
         isOk = false;
         continue;
       }
-      newBoard = this.applyPattern(newBoard, pattern, posX, posY);
-
-      if (new ConnectedTilesFinder(newBoard).getConnectedTiles().length > 0) {
-        isOk = false;
-        continue;
-      }
+      newBoard = this.addPatternToBoard(newBoard, pattern, posX, posY);
     }
 
     return newBoard;
   }
 
-  private applyPattern(
+  private addPatternToBoard(
     board: BoardData,
     pattern: FirstMovePattern,
     posX: number,
@@ -76,20 +70,19 @@ export class FirstMoveAdder {
   ) {
     const newBoard = deepCopy(board);
 
-    const types = this.assignRandomTypesToPattern(pattern);
-    for (let x = 0; x < pattern.sizeX; x++) {
-      for (let y = 0; y < pattern.sizeY; y++) {
-        const tile = newBoard.tiles.find(
-          (item) => item.posX === x + posX && item.posY === y + posY
-        )!;
+    const tilesInPattern = this.generateTileWithPattern(pattern);
 
-        this._changedTiles.push(tile);
-        if (pattern.pattern[y][x] < 0) {
-          tile.type = this.getRandomType();
-        } else {
-          tile.type = types[pattern.pattern[y][x]];
-        }
-      }
+    for (const item of tilesInPattern) {
+      const newTile: TileData = {
+        posX: posX + item.posX,
+        posY: posY + item.posY,
+        id: newBoard.itemCount,
+        type: item.type,
+      };
+      this._changedTiles.push(newTile);
+
+      newBoard.tiles.push(newTile);
+      newBoard.itemCount++;
     }
 
     return newBoard;
@@ -131,7 +124,44 @@ export class FirstMoveAdder {
     return false;
   }
 
-  private assignRandomTypesToPattern = (pattern: FirstMovePattern) => {
+  private generateTileWithPattern(pattern: FirstMovePattern): TileData[] {
+    const types = this.assignRandomTypesToPattern(pattern);
+    const tiles: TileData[] = [];
+
+    for (let x = 0; x < pattern.sizeX; x++) {
+      for (let y = 0; y < pattern.sizeY; y++) {
+        let type: TileType | undefined = undefined;
+
+        if (pattern.pattern[y][x] < 0) {
+          type = this.getRandomTypeWithoutPatternTypes(types);
+        } else {
+          type = types[pattern.pattern[y][x]];
+        }
+
+        const newTile: TileData = {
+          posX: x,
+          posY: y,
+          id: 0,
+          type: type,
+        };
+
+        tiles.push(newTile);
+      }
+    }
+
+    return tiles;
+  }
+
+  private getRandomTypeWithoutPatternTypes(types: Record<number, TileType>) {
+    let newType: TileType = this.getRandomType();
+    while (Object.values(types).find((item) => item.id === newType.id)) {
+      newType = this.getRandomType();
+    }
+
+    return newType;
+  }
+
+  private assignRandomTypesToPattern(pattern: FirstMovePattern) {
     const types: Record<number, TileType> = {};
 
     for (const type of pattern.types) {
@@ -139,9 +169,9 @@ export class FirstMoveAdder {
     }
 
     return types;
-  };
+  }
 
-  private getRandomType = () => {
+  private getRandomType() {
     return this._tileTypes[Math.floor(Math.random() * this._tileTypes.length)];
-  };
+  }
 }
