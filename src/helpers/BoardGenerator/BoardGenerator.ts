@@ -1,6 +1,10 @@
 import { BoardData, TileData, TileType } from "src/types";
-import { checkGameOver, checkTileConnectionsValid } from "src/helpers";
-import { FirstMoveAdder } from "../FirstMoveAdder/FirstMoveAdder";
+import {
+  ConnectedTilesFinder,
+  FirstMoveAdder,
+  checkTileConnectionsValid,
+  deepCopy,
+} from "src/helpers";
 
 export class BoardGenerator {
   private _sizeX: number;
@@ -14,73 +18,64 @@ export class BoardGenerator {
   }
 
   public generate(firstMove: number) {
-    const board = this.generateLossBoard();
-    const boardWithFirstMoves = new FirstMoveAdder(
-      board,
-      this._tileTypes
-    ).addFirstMovePatterns(firstMove);
-
-    return boardWithFirstMoves;
-  }
-
-  private generateLossBoard() {
+    let connectedTiles: TileData[] = [];
     let board: BoardData | undefined = undefined;
-    let correctBoard = false;
 
-    while (!correctBoard) {
-      const { tiles, lastIndex } = this.initializeGrid();
+    while (!board || connectedTiles.length > 0) {
       const newBoard: BoardData = {
-        tiles: tiles,
-        itemCount: lastIndex,
+        tiles: [],
+        itemCount: 0,
         sizeX: this._sizeX,
         sizeY: this._sizeY,
       };
 
-      for (const item of tiles) {
-        let randomType =
-          this._tileTypes[Math.floor(Math.random() * this._tileTypes.length)];
-        while (
-          !checkTileConnectionsValid(
-            newBoard,
-            item.posX,
-            item.posY,
-            randomType.id,
-            3
-          )
-        ) {
-          randomType =
-            this._tileTypes[Math.floor(Math.random() * this._tileTypes.length)];
-        }
+      const boardWithFirstMoves = new FirstMoveAdder(
+        newBoard,
+        this._tileTypes
+      ).addFirstMovePatterns(firstMove);
 
-        item.type = randomType;
-      }
+      const filledBoard = this.fillBoardWithRandomTiles(boardWithFirstMoves);
+      connectedTiles = new ConnectedTilesFinder(
+        filledBoard
+      ).getConnectedTiles();
 
-      if (checkGameOver(newBoard)) {
-        board = newBoard;
-        correctBoard = true;
-      }
+      board = filledBoard;
     }
 
-    return board!;
+    return board;
   }
 
-  private initializeGrid() {
-    const tiles: TileData[] = [];
-    let lastIndex: number = 0;
+  private fillBoardWithRandomTiles(board: BoardData) {
+    const newBoard = deepCopy(board);
 
-    for (let x = 0; x < this._sizeX; x++) {
-      for (let y = 0; y < this._sizeY; y++) {
-        tiles.push({
+    for (let x = 0; x < newBoard.sizeX; x++) {
+      for (let y = 0; y < newBoard.sizeY; y++) {
+        const tile = newBoard.tiles.find(
+          (item) => item.posX === x && item.posY === y
+        );
+
+        if (tile) continue;
+
+        let randomType = this.getRandomType();
+
+        while (!checkTileConnectionsValid(newBoard, x, y, randomType.id)) {
+          randomType = this.getRandomType();
+        }
+
+        newBoard.tiles.push({
           posX: x,
           posY: y,
-          id: lastIndex,
-          type: { id: "-1", img: "" },
+          id: board.itemCount,
+          type: randomType,
         });
-
-        lastIndex++;
+        board.itemCount++;
       }
     }
 
-    return { tiles, lastIndex };
+    return newBoard;
+  }
+
+  private getRandomType() {
+    return this._tileTypes[Math.floor(Math.random() * this._tileTypes.length)];
   }
 }
